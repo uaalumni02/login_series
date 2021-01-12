@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 
+import Api from "../data/api";
 
 import {
   MDBContainer,
@@ -16,24 +17,16 @@ import {
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
- 
-  const handleSubmit = (event) => {
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    fetch(`http://localhost:3000/api/user/`, {
-      method: "post",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        username,
-        password,
-      }),
-    })
-      .then((res) => res.json())
-      .then((response) => {
-        console.log(response);
-      })
-      .catch((error) => console.error("Error:", error));
+
+    const loginResponse = await Api.login(username, password);
+    console.log(loginResponse)
+    if (!loginResponse.success) {
+      setError(loginResponse.message);
+    }
   };
 
   return (
@@ -70,6 +63,7 @@ const Login = () => {
                 validate
                 containerClass="mb-0"
               />
+              <h6> {error}</h6>
               <p className="font-small blue-text d-flex justify-content-end pb-3">
                 Forgot
                 <a href="#!" className="blue-text ml-1">
