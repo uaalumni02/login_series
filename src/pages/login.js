@@ -1,6 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useContext, useEffect } from "react";
 
 import Api from "../data/api";
+import LocalStorage from "../utils/localstorage";
+
+import Context from "../store/context";
 
 import {
   MDBContainer,
@@ -19,14 +22,28 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    if (globalState.isLoggedIn) {
+      const user = LocalStorage.get("user");
+      globalDispatch({ type: "SET_LOGGEDIN_USER", payload: user });
+    }
+  }, []);
+
+  const { globalState, globalDispatch } = useContext(Context);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     const loginResponse = await Api.login(username, password);
-    console.log(loginResponse)
     if (!loginResponse.success) {
       setError(loginResponse.message);
+      return false;
     }
+
+    const { token, user } = loginResponse.data;
+    LocalStorage.save("token", token);
+    LocalStorage.save("user", user._id);
+    globalDispatch({ type: "SET_LOGGEDIN_USER", payload: user });
   };
 
   return (

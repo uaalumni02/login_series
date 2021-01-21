@@ -4,7 +4,7 @@ const reducer = (state, action) => {
       return {
         ...state,
         isLoggedIn: true,
-        userId: action.payload,
+        user: action.payload,
       };
   }
 };
