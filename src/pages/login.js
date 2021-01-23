@@ -1,9 +1,13 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useReducer } from "react";
 
 import Api from "../data/api";
 import LocalStorage from "../utils/localstorage";
 
 import Context from "../store/context";
+
+import userReducer from "../store/reducer";
+
+import initialState from "../store/store";
 
 import {
   MDBContainer,
@@ -18,9 +22,7 @@ import {
 } from "mdbreact";
 
 const Login = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [state, dispatch] = useReducer(userReducer, initialState.login);
 
   useEffect(() => {
     if (globalState.isLoggedIn) {
@@ -35,8 +37,12 @@ const Login = () => {
     event.preventDefault();
 
     const loginResponse = await Api.login(username, password);
+    console.log(loginResponse);
     if (!loginResponse.success) {
-      setError(loginResponse.message);
+      dispatch({
+        field: "error",
+        value: "Invalid username, password",
+      });
       return false;
     }
 
@@ -45,6 +51,15 @@ const Login = () => {
     LocalStorage.save("user", user._id);
     globalDispatch({ type: "SET_LOGGEDIN_USER", payload: user });
   };
+
+  const onChange = (e) => {
+    dispatch({
+      field: e.target.name,
+      value: e.target.value.toLowerCase().trim(),
+    });
+  };
+
+  const { username, password, error } = state;
 
   return (
     <MDBContainer>
@@ -63,9 +78,9 @@ const Login = () => {
               </div>
               <MDBInput
                 label="Your username"
-                onChange={(e) =>
-                  setUsername(e.target.value.toLowerCase().trim())
-                }
+                name="username"
+                value={username}
+                onChange={onChange}
                 group
                 type="email"
                 validate
@@ -74,7 +89,9 @@ const Login = () => {
               />
               <MDBInput
                 label="Your password"
-                onChange={(e) => setPassword(e.target.value.trim())}
+                name="password"
+                value={password}
+                onChange={onChange}
                 group
                 type="password"
                 validate

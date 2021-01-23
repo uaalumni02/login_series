@@ -9,4 +9,11 @@ const reducer = (state, action) => {
   }
 };
 
-export default reducer;
+const userReducer = (state, { field, value }) => {
+  return {
+    ...state,
+    [field]: value,
+  };
+};
+
+export default userReducer ;
